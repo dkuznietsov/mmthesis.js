@@ -1,25 +1,16 @@
-const { rfPromisify } = require('./src/helpers')
+const { rfPromisify, accessPromisify } = require('./src/helpers')
+
+const { naiveClean } = require('./src/contentPreprocessor')
 
 const { MarkovChain } = require('./src/markovChain')
 const { MarkovChainGenerator } = require('./src/markovChainGenerator')
 
+async function main(filePath, numIterations = 40, tokenLength = 30) {
+    await accessPromisify(filePath)
 
-async function main() {
-    const data = await rfPromisify('data', 'csv')
+    const data = await rfPromisify(filePath)
 
-    const text = data.toString()
-
-    // split data by row
-    // remove empty, 'no' and 'відраховано' strings (found by inspecting file contents)
-    const topics = text
-        .replace(',', '')
-        .split('\r\n')
-        .filter(str =>
-            !!str && !str.includes('no') && !str.includes('відраховано'))
-
-    const topicsWords = topics
-        .map(topic =>
-            topic.split(' '))
+    const topicsWords = naiveClean(data.toString())
 
     const markovChain = new MarkovChain(topicsWords)
 
@@ -29,11 +20,13 @@ async function main() {
         topicsWords
     )
 
-    return Array.from(
-        { length: 40 },
+    const res = Array.from(
+        { length: numIterations },
         () =>
-            generator.generate(30)
+            generator.generate(tokenLength)
     )
-}
 
-main()
+    console.log(res)
+    return res
+}
+main(...process.argv.slice(2))

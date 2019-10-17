@@ -3,6 +3,33 @@ const _ = require('lodash')
 const fs = require('fs')
 
 /**
+ * Performs readFile node operation and returns promise
+ * @param {string} path
+ * @returns {Promise<Buffer|NodeJS.ErrnoException>} promise with result of operation
+ */
+const rfPromisify = path =>
+    new Promise((resolve, reject) =>
+        fs.readFile(path, (err, data) => {
+            if (err) {
+                reject(err)
+            }
+            resolve(data)
+        }))
+
+/**
+ * @param {string} path
+ */
+const accessPromisify = path =>
+    new Promise((resolve, reject) => {
+        fs.access(path, fs.F_OK, err => {
+            if (err) {
+                reject(err)
+            }
+            resolve({})
+        })
+    })
+
+/**
  * Normalizes occurencies count so that each
  * next entry contains acumulated probability of previous entryies, up to 1
  * @param {Array<[string, number]>} dictPairs
@@ -19,22 +46,6 @@ const normalizeDict = dictPairs => {
         .first()
         .value()
 }
-
-
-/**
- * Performs readFile node operation and returns promise
- * @param {string} filename
- * @param {string} format
- * @returns {Promise<Buffer|NodeJS.ErrnoException>} promise with result of operation
- */
-const rfPromisify = (filename, format) =>
-    new Promise((resolve, reject) =>
-        fs.readFile(`${__dirname}/${filename}.${format}`, (err, data) => {
-            if (err) {
-                reject(err)
-            }
-            resolve(data)
-        }))
 
 /**
  * finds word from entries by acumulated probability
@@ -65,5 +76,6 @@ const acumulatedProbWordChooser = dictPairs => {
 
 module.exports = {
     rfPromisify,
+    accessPromisify,
     acumulatedProbWordChooser
 }
