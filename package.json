@@ -12,6 +12,6 @@
     "eslint": "^6.5.1",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.19"
   }
 }
